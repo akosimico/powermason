@@ -1,0 +1,28 @@
+{% for profile in profiles %}
+<tr class="border-b hover:bg-gray-50 transition-colors" data-updated="{{ profile.updated_at|date:'U' }}">
+    <form method="post" class="contents">
+        {% csrf_token %}
+        <input type="hidden" name="profile_id" value="{{ profile.id }}">
+        <td class="px-4 py-3 border font-medium text-gray-900">{{ profile.user.username }}</td>
+        <td class="px-4 py-3 border">
+            <input type="text" name="full_name" value="{{ profile.full_name }}"
+                class="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition">
+        </td>
+        <td class="px-4 py-3 border" data-role="{{ profile.role }}">
+            <select name="role" class="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition">
+                {% for code, label in ROLE_CHOICES %}
+                <option value="{{ code }}" {% if code == profile.role %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </td>
+
+        <td class="px-4 py-3 border text-center">
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 shadow-sm transition">Save</button>
+        </td>
+    </form>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="4" class="text-center p-4 text-gray-500">No profiles found.</td>
+</tr>
+{% endfor %}

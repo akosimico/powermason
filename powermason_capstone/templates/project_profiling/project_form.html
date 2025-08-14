@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Create Project{% endblock %}
+
+{% block sidebar %}
+{% include "_sidebar.html" %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+        background-color: #f8f9fa;
+    }
+
+    h1 {
+        text-align: center;
+        color: #333;
+    }
+
+    form {
+        max-width: 800px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    input,
+    select,
+    textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #0056b3;
+    }
+
+    a {
+        display: inline-block;
+        margin-top: 15px;
+        text-decoration: none;
+        color: #007bff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>Create a New Project</h1>
+<form method="POST">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="id_project_source">Project Source</label>
+        {{ form.project_source }}
+    </div>
+    <div class="form-group">
+        <label for="id_project_code">Project Code</label>
+        {{ form.project_code }}
+    </div>
+    <div class="form-group">
+        <label for="id_project_name">Project Name</label>
+        {{ form.project_name }}
+    </div>
+    <div class="form-group">
+        <label for="id_project_type">Project Type</label>
+        {{ form.project_type }}
+    </div>
+    <div class="form-group">
+        <label for="id_project_category">Project Category</label>
+        {{ form.project_category }}
+    </div>
+    <div class="form-group">
+        <label for="id_client_name">Client Name</label>
+        {{ form.client_name }}
+    </div>
+    <div class="form-group">
+        <label for="id_location">Location</label>
+        {{ form.location }}
+    </div>
+    <div class="form-group">
+        <label for="id_gps_coordinates">GPS Coordinates</label>
+        {{ form.gps_coordinates }}
+    </div>
+    <div id="map" style="height: 400px; margin-top: 15px;"></div>
+    <div class="form-group">
+        <label for="id_start_date">Start Date</label>
+        {{ form.start_date }}
+    </div>
+    <div class="form-group">
+        <label for="id_target_completion_date">Target Completion Date</label>
+        {{ form.target_completion_date }}
+    </div>
+    <div class="form-group">
+        <label for="id_actual_completion_date">Actual Completion Date</label>
+        {{ form.actual_completion_date }}
+    </div>
+    <div class="form-group">
+        <label for="id_project_manager">Project Manager</label>
+        {{ form.project_manager }}
+    </div>
+    <div class="form-group">
+        <label for="id_site_engineer">Site Engineer</label>
+        {{ form.site_engineer }}
+    </div>
+    <div class="form-group">
+        <label for="id_budget">Budget</label>
+        {{ form.budget }}
+    </div>
+    <div class="form-group">
+        <label for="id_allocated_funds">Allocated Funds</label>
+        {{ form.allocated_funds }}
+    </div>
+    <div class="form-group">
+        <label for="id_expense">Expense</label>
+        {{ form.expense }}
+    </div>
+    <div class="form-group">
+        <label for="id_status">Status</label>
+        {{ form.status }}
+    </div>
+    <button type="submit">Save</button>
+</form>
+<a href="{% url 'project_list' %}">← Back to Project List</a>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const locationInput = document.getElementById("id_location");
+        const gpsInput = document.getElementById("id_gps_coordinates");
+
+        var map = L.map('map').setView([14.5995, 120.9842], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        var marker;
+
+        map.on('click', function (e) {
+            var latlng = e.latlng;
+            if (marker) {
+                marker.setLatLng(latlng);
+            } else {
+                marker = L.marker(latlng).addTo(map);
+            }
+            gpsInput.value = latlng.lat.toFixed(6) + ", " + latlng.lng.toFixed(6);
+        });
+
+        if (L.Control.Geocoder) {
+            L.Control.geocoder({ defaultMarkGeocode: false })
+                .on('markgeocode', function (e) {
+                    var latlng = e.geocode.center;
+                    if (marker) {
+                        marker.setLatLng(latlng);
+                    } else {
+                        marker = L.marker(latlng).addTo(map);
+                    }
+                    map.setView(latlng, 16);
+                    locationInput.value = e.geocode.name;
+                    gpsInput.value = latlng.lat.toFixed(6) + ", " + latlng.lng.toFixed(6);
+                }).addTo(map);
+        }
+
+        if (gpsInput.value) {
+            const parts = gpsInput.value.split(',');
+            if (parts.length === 2) {
+                const lat = parseFloat(parts[0]);
+                const lng = parseFloat(parts[1]);
+                map.setView([lat, lng], 16);
+                marker = L.marker([lat, lng]).addTo(map);
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "*"
+django-environ = "*"
+psycopg2 = "*"
+psycopg2-binary = "*"
+python-dotenv = "*"
+django-heroku = "*"
+gunicorn = "*"
+waitress = "*"
+pyrebase4 = "*"
+firebase-admin = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.13"

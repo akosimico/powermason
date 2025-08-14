@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto mt-8">
+  <h1 class="text-3xl font-bold mb-6 text-gray-800">Manage User Profiles</h1>
+
+  <!-- Table Search & Role Filter -->
+  <div class="flex flex-wrap items-center gap-4 mb-4">
+    <!-- Search Input -->
+    <div class="relative w-full max-w-md">
+      <input type="text" id="tableSearchInput" placeholder="Search by username or full name..."
+        class="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400">
+    </div>
+
+    <!-- Role Filter -->
+    <div>
+      <select id="roleFilter"
+        class="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400">
+        <option value="">All Roles</option>
+        {% for code, label in ROLE_CHOICES %}
+        <option value="{{ code }}">{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Add / Assign Role Button -->
+    <div class="mb-4 flex justify-end">
+      <button id="openModalBtn" class="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-2 rounded-lg 
+           shadow-lg hover:from-green-600 hover:to-green-700 
+           focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-1 
+           transition-all font-semibold">
+        Add / Assign Role
+      </button>
+    </div>
+
+    <!-- Table -->
+    <table class="w-full text-sm text-left border-collapse">
+      <thead class="bg-gray-50 text-gray-700 uppercase text-xs tracking-wider">
+        <tr>
+          <th class="px-4 py-3 border">Username</th>
+          <th class="px-4 py-3 border">Full Name</th>
+          <th class="px-4 py-3 border">Role</th>
+          <th class="px-4 py-3 border text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        {% include 'partials/_user_table_rows.html' %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal -->
+  <div id="addUserModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md">
+      <h2 class="text-lg font-bold mb-4">Add / Assign Role</h2>
+      <form id="addUserForm" method="POST" action="{% url 'manage_user_profiles' %}">
+        {% csrf_token %}
+        <div class="mb-4 relative">
+          <label class="block text-sm font-medium mb-1">Search User</label>
+          <input type="text" id="userSearchInput"
+            class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="Type name or email">
+          <ul id="userSearchResults"
+            class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto hidden">
+          </ul>
+        </div>
+
+        <input type="hidden" name="profile_id" id="selectedUserId">
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1">Role</label>
+          <select name="role" class="w-full border rounded-md px-3 py-2">
+            {% for code, label in ROLE_CHOICES %}
+            <option value="{{ code }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <button type="button" id="closeModalBtn" class="px-4 py-2 bg-gray-300 rounded">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% endblock %}
+
+  {% block extra_scripts %}
+  <script src="{% static 'js/manage_user_profiles.js' %}" defer></script>
+  {% endblock %}

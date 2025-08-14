@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<p>Hello from the index page!</p>
+
+<h1>Project List</h1>
+<ul class="list-group">
+    <li class="light-group-item">Bought Beer</li>
+    <li class="light-group-item">Bought Beer</li>
+    <li class="light-group-item">Bought Beer</li>
+    <li class="light-group-item">Bought Beer</li>
+    <li class="light-group-item">Bought Beer</li>
+    <li class="light-group-item">Bought Beer</li>
+    <li class="light-group-item">Bought Beer</li>
+    <li class="light-group-item">Bought Beer</li>
+    <li class="light-group-item">Bought Beer</li>
+</ul>
+<a href="{% url 'account_email' %}">Manage Email</a>
+{% endblock %}

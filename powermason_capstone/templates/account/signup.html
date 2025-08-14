@@ -1,0 +1,98 @@
+{% extends "base_auth.html" %}
+{% load static %}
+{% load socialaccount %}
+{% load i18n %}
+{% load allauth account %}
+{% block head_title %}
+    {% trans "Sign Up" %}
+{% endblock head_title %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-6">
+    <div class="max-w-lg w-full bg-white shadow-xl rounded-2xl p-10">
+        
+        <!-- Title -->
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">{% trans "Sign Up" %}</h1>
+
+        <!-- Already have an account? -->
+        <p class="text-base text-gray-600 mb-8 text-center leading-relaxed">
+            {% blocktranslate %}Already have an account? Then please 
+                <a href="{{ login_url }}" class="text-blue-600 hover:underline font-medium">sign in</a>.
+            {% endblocktranslate %}
+        </p>
+
+        {% if not SOCIALACCOUNT_ONLY %}
+            {% url 'account_signup' as action_url %}
+            <form method="post" action="{{ action_url }}" class="space-y-6">
+                {% csrf_token %}
+
+                <!-- Username Field -->
+<div class="mb-4">
+    <input type="text" name="username" placeholder="Username"
+           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+           required>
+    <p class="text-xs text-black mt-1 font-semibold">
+        {% trans "Username must be unique and contain 3-30 characters. Letters, digits and @/./+/-/_ only." %}
+    </p>
+</div>
+
+<!-- Email Field -->
+<div class="mb-4">
+    <input type="email" name="email" placeholder="Email address"
+           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+           required>
+    <p class="text-xs text-black mt-1 font-semibold">
+        {% trans "Enter a valid email address. Used for account verification and password resets." %}
+    </p>
+</div>
+
+<!-- Password Field -->
+<div class="mb-4">
+    <input type="password" name="password1" placeholder="Password"
+           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+           required>
+    <p class="text-xs text-black mt-1 font-semibold">
+        {% trans "Password must be at least 8 characters and cannot be entirely numeric." %}
+    </p>
+</div>
+
+<!-- Confirm Password Field -->
+<div class="mb-6">
+    <input type="password" name="password2" placeholder="Confirm Password"
+           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+           required>
+    <p class="text-xs text-black mt-1 font-semibold">
+        {% trans "Enter the same password as above, for verification." %}
+    </p>
+</div>
+
+<!-- Sign Up Button -->
+<button type="submit"
+        class="w-full bg-blue-600 text-white py-3 rounded-lg text-lg font-medium hover:bg-blue-700 transition">
+    {% trans "Sign Up" %}
+</button>
+
+            </form>
+        {% endif %}
+
+        {% if SOCIALACCOUNT_ENABLED %}
+            <div class="mt-6">
+                <!-- Google Sign Up Button -->
+                <a href="{% provider_login_url 'google' %}"
+                   class="flex items-center justify-center gap-3 border border-gray-300 py-3 rounded-lg hover:bg-gray-50 transition text-gray-700 font-medium">
+                    <img src="{% static 'img/google_logo.png' %}" alt="Google" class="w-5 h-5">
+                    <span>Sign up with Google</span>
+                </a>
+            </div>
+        {% endif %}
+
+        {% if PASSKEY_SIGNUP_ENABLED %}
+            <hr class="my-8 border-gray-300">
+            <a href="{{ signup_by_passkey_url }}"
+               class="block w-full border border-blue-600 text-blue-600 py-3 rounded-lg text-lg text-center font-medium hover:bg-blue-50 transition">
+                {% trans "Sign up using a passkey" %}
+            </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}

@@ -1,7 +1,7 @@
 from django.db.models.signals import post_migrate, post_save
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
-from .models import UserProfile
+from authentication.models import UserProfile
 
 User = get_user_model()
 # --- Auto-create a single superuser after migration ---

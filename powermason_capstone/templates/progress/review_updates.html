@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+  <button 
+    type="button"
+    onclick="history.back()"
+    class="inline-block mb-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg shadow hover:bg-gray-300 transition">
+    &larr; Back
+</button>
+
+<div class="max-w-5xl mx-auto bg-white p-6 rounded-2xl shadow-md mt-6">
+  <h2 class="text-xl font-semibold mb-4">Pending Progress Updates</h2>
+
+  {% if updates %}
+  <div class="overflow-x-auto">
+    <table class="min-w-full border border-gray-200 rounded-lg">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-4 py-2 text-left">Task</th>
+          <th class="px-4 py-2 text-left">Project</th>
+          <th class="px-4 py-2 text-left">PM</th>
+          <th class="px-4 py-2 text-left">Reported %</th>
+          <th class="px-4 py-2 text-left">Proof</th>
+          <th class="px-4 py-2 text-left">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for update in updates %}
+        <tr>
+          <td class="px-4 py-2">{{ update.task.task_name }}</td>
+          <td class="px-4 py-2">{{ update.task.project.project_name }}</td>
+          <td class="px-4 py-2">{{ update.reported_by.full_name }}</td>
+          <td class="px-4 py-2">{{ update.progress_percent }}%</td>
+          <td class="px-4 py-2">
+            {% for att in update.attachments.all %}
+              <a href="{{ att.file.url }}" target="_blank" class="text-indigo-600 hover:underline">Proof {{ forloop.counter }}</a><br>
+            {% endfor %}
+          </td>
+          <td class="px-4 py-2 flex gap-2">
+            <a href="{% url 'approve_update' update.id %}" 
+   class="px-3 py-1 rounded-lg bg-green-600 text-white hover:bg-green-700">
+   Approve
+</a>
+<a href="{% url 'reject_update' update.id %}" 
+   class="px-3 py-1 rounded-lg bg-red-600 text-white hover:bg-red-700">
+   Reject
+</a>
+
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p class="text-gray-500">No pending updates to review.</p>
+  {% endif %}
+</div>
+{% endblock %}

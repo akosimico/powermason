@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="text-xl font-bold mb-4">Project Details</h2>
+
+<div class="grid grid-cols-2 gap-4">
+    <div>
+        <strong>Project Code:</strong> {{ project.project_code }}
+    </div>
+    <div>
+        <strong>Project Name:</strong> {{ project.project_name }}
+    </div>
+    <div>
+        <strong>Project Type:</strong> {{ project.project_type }}
+    </div>
+    <div>
+        <strong>Project Category:</strong> {{ project.project_category }}
+    </div>
+    <div>
+        <strong>Project Manager:</strong> {{ project.project_manager.full_name }}
+    </div>
+    <div>
+        <strong>Site Engineer:</strong> {{ project.site_engineer }}
+    </div>
+    <div>
+        <strong>Start Date:</strong> {{ project.start_date }}
+    </div>
+    <div>
+        <strong>Target Completion:</strong> {{ project.target_completion_date }}
+    </div>
+    <div>
+        <strong>Status:</strong> {{ project.status }}
+    </div>
+    <div>
+        <strong>Description:</strong> {{ project.description }}
+    </div>
+</div>
+
+<a href="{% url 'project_list' dashboard_token role %}"
+    class="mt-4 inline-block bg-gray-200 px-4 py-2 rounded hover:bg-gray-300">
+    Back to Project List
+</a>
+{% endblock %}

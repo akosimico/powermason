@@ -1,4 +1,6 @@
 {% load static %}
+{% load role_tags %}
+
 <div id="sidebar" class="sidebar fixed md:relative w-64 h-screen bg-white shadow-lg md:shadow-none z-30">
     <!-- Logo -->
     <div class="p-4 flex items-center justify-between border-b border-gray-200">
@@ -16,19 +18,41 @@
 
 
 
-{% if user.is_authenticated %}
-<div class="p-4 border-b border-gray-200">
-    <a href="{% url 'profile' %}" class="flex items-center space-x-3 hover:bg-gray-100 p-2 rounded-lg transition">
-        <img src="{{ avatar_url }}" 
-             alt="User profile" 
-             class="h-12 w-12 rounded-full bg-gray-200 object-cover">
-        <div>
-            <p class="font-medium text-gray-800">Welcome back,</p>
-            <p class="font-semibold">{{ user.first_name|default:user.username }}</p>
-        </div>
+    {% if user.is_authenticated %}
+    <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+        <a href="{% url 'profile' %}" class="flex items-center space-x-3 hover:bg-gray-100 p-2 rounded-lg transition">
+            <img src="{{ avatar_url }}" alt="User profile" class="h-12 w-12 rounded-full bg-gray-200 object-cover">
+            <div>
+                <p class="font-medium text-gray-800">Welcome back,</p>
+                <p class="font-semibold">{{ user.first_name|default:user.username }}</p>
+            </div>
+        </a>
+
+{% if user|has_role:"OM,EG" %}
+    <a href="{% url 'review_updates' %}" class="relative inline-block">
+        <svg class="h-8 w-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+        </svg>
+
+        {% if pending_count > 0 %}
+        <span class="absolute -top-1 -right-1 bg-red-600 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">
+            {{ pending_count }}
+        </span>
+        {% endif %}
     </a>
-</div>
 {% endif %}
+
+
+
+
+
+
+
+
+    </div>
+{% endif %}
+
 
 
     <!-- Sidebar Menu -->
@@ -49,11 +73,10 @@
                 </a>
             </li>
 
-            <!-- Project Profiling with Submenu -->
+            <!-- Project Profiling -->
             <li class="sidebar-menu-item rounded-lg">
-                <button
-                    class="flex items-center w-full text-left p-3 text-gray-700 hover:text-blue-600 rounded-lg transition pointer-events-auto"
-                    data-submenu-toggle>
+                <a href="{% url 'project_list_default' %}"
+                    class="flex items-center w-full p-3 text-gray-700 hover:text-blue-600 rounded-lg transition">
 
                     <!-- Icon -->
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-gray-500" fill="none"
@@ -64,43 +87,9 @@
 
                     <!-- Text -->
                     <span class="flex-1 font-medium">Project Profiling</span>
-
-                    <!-- Dropdown arrow -->
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                        class="ml-auto h-4 w-4 transform transition-transform duration-200" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-
-                <!-- Submenu -->
-                <ul class="submenu pl-10 space-y-1 mt-1 hidden">
-                    <li>
-                        <a href="{% url 'project_create' %}"
-                            class="block py-2 px-3 rounded  hover:text-blue-600 transition">
-                            Create Project
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'project_list' %}"
-                            class="block py-2 px-3 rounded hover:text-blue-600 transition">
-                            Project List
-                        </a>
-                    </li>
-                </ul>
-            </li>
-
-            <!-- Project Schedules -->
-            <li class="sidebar-menu-item rounded-lg">
-                <a href="#" class="flex items-center p-3 text-gray-700 hover:text-blue-600 rounded-lg transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span class="font-medium">Project Schedules</span>
                 </a>
             </li>
+
 
             <!-- Progress Monitoring -->
             <li class="sidebar-menu-item rounded-lg">
@@ -141,30 +130,46 @@
         </ul>
     </nav>
 
-   <div class="p-4 border-t border-gray-200 space-y-2">
-    {% if user.is_authenticated %}
+    <div class="flex flex-col h-full p-4 border-t border-gray-200 space-y-2 mt-auto">
+
+        {% if user.is_authenticated %}
+        {% if user.is_superuser or user|has_role:"EG" %}
+
+        <!-- Manage Users Link -->
+        <a href="{% url 'manage_user_profiles' %}"
+            class="flex items-center w-full text-gray-700 hover:text-gray-900 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87M12 12a4 4 0 100-8 4 4 0 000 8z" />
+            </svg>
+            Manage Users
+        </a>
+        {% endif %}
+
         <!-- Settings Link -->
-        <a href="{% url 'settings' %}" 
-           class="flex items-center w-full text-gray-700 hover:text-gray-900 transition">
-             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" 
-              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.517-.877 3.296.902 2.419 2.419a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.877 1.517-.902 3.296-2.419 2.419a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.517.877-3.296-.902-2.419-2.419a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.877-1.517.902-3.296 2.419-2.419.9.52 2.057.184 2.573-1.066z"/>
-        <path stroke-linecap="round" stroke-linejoin="round" 
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-    </svg>
+        <a href="{% url 'settings' %}" class="flex items-center w-full text-gray-700 hover:text-gray-900 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.517-.877 3.296.902 2.419 2.419a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.877 1.517-.902 3.296-2.419 2.419a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.517.877-3.296-.902-2.419-2.419a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.877-1.517.902-3.296 2.419-2.419.9.52 2.057.184 2.573-1.066z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
             Settings
         </a>
 
         <!-- Logout Link -->
-        <a href="{% url 'account_logout' %}" 
-           class="flex items-center w-full text-red-600 hover:text-red-700 transition">
-           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3H6.75A2.25 2.25 0 004.5 5.25v13.5A2.25 2.25 0 006.75 21h6.75a2.25 2.25 0 002.25-2.25V15M18 12H9m9 0l-3-3m3 3l-3 3"/>
+        <a href="{% url 'account_logout' %}"
+            class="flex items-center w-full text-red-600 hover:text-red-700 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2 text-red-500" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M15.75 9V5.25A2.25 2.25 0 0013.5 3H6.75A2.25 2.25 0 004.5 5.25v13.5A2.25 2.25 0 006.75 21h6.75a2.25 2.25 0 002.25-2.25V15M18 12H9m9 0l-3-3m3 3l-3 3" />
             </svg>
-
             Logout
         </a>
-    {% endif %}
-</div>
+        {% endif %}
+    </div>
+
 
 </div>

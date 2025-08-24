@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-6xl mx-auto mt-8 space-y-8">
+
+  
+  <!-- Project Progress -->
+  <div class="bg-white p-6 rounded-2xl shadow-md">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-2xl font-semibold flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h4l3 10h8l3-10h4M5 6h14M9 6V4m6 2V4"/>
+        </svg>
+        Project: {{ project.project_name }}
+      </h2>
+      <span class="text-sm text-gray-500">Status: {{ project.project_status }}</span>
+    </div>
+
+    <div class="w-full bg-gray-200 rounded-full h-5 overflow-hidden">
+      <div 
+        class="h-5 bg-indigo-600 text-xs font-medium text-white text-center transition-all duration-700"
+        style="width: {{ total_progress }}%">
+        {{ total_progress }}%
+      </div>
+    </div>
+  </div>
+
+  <!-- Task Progress -->
+  <div class="bg-white p-6 rounded-2xl shadow-md">
+    <h3 class="text-xl font-semibold mb-5 flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m-6-8h6M5 8h.01M5 12h.01M5 16h.01"/>
+      </svg>
+      Task Progress
+    </h3>
+    <div class="space-y-6">
+      {% for task, progress in task_progress %}
+      <div>
+        <div class="flex justify-between mb-1 text-sm">
+          <span class="font-medium text-gray-700">{{ task.task_name }}</span>
+          <span class="font-semibold {% if progress >= 100 %}text-green-600{% elif progress >= 50 %}text-yellow-600{% else %}text-red-600{% endif %}">
+            {{ progress }}%
+          </span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+          <div 
+            class="h-4 transition-all duration-700 rounded-full
+              {% if progress >= 100 %}
+                bg-green-500
+              {% elif progress >= 50 %}
+                bg-yellow-500
+              {% else %}
+                bg-red-500
+              {% endif %}" 
+            style="width: {{ progress }}%">
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-gray-500 italic">No tasks available for this project.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Stats Overview -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+    <div class="bg-white p-5 rounded-2xl shadow-md text-center">
+      <h4 class="text-sm font-medium text-gray-500">Total Tasks</h4>
+      <p class="text-2xl font-bold text-indigo-600">{{ task_progress|length }}</p>
+    </div>
+    <div class="bg-white p-5 rounded-2xl shadow-md text-center">
+      <h4 class="text-sm font-medium text-gray-500">Overall Progress</h4>
+      <p class="text-2xl font-bold text-green-600">{{ total_progress }}%</p>
+    </div>
+    <div class="bg-white p-5 rounded-2xl shadow-md text-center">
+      <h4 class="text-sm font-medium text-gray-500">Project Weight</h4>
+      <p class="text-2xl font-bold text-yellow-600">
+        {{ project.projecttask_set.aggregate_sum_weight|default:"0" }}%
+      </p>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

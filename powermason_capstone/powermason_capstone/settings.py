@@ -23,6 +23,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Application definition
 
@@ -38,9 +40,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    'project_profiling',
     'widget_tweaks',
+    
+    
+    'project_profiling',
+    'scheduling',
     'authentication',
+
     
 ]
 SITE_ID = 1 
@@ -80,7 +86,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'authentication.context_processors.avatar_url',
+                'authentication.utils.context_processors.user_context',
             ],
         },
     },
@@ -173,7 +179,6 @@ if ENVIRONMENT == 'production' or POSTGRES_LOCALLY == True:
     EMAIL_PORT =  587
     EMAIL_USE_TLS = True  
     EMAIL_USE_SSL = False   
-    DEFAULT_FROM_EMAIL = os.getenv('EMAIL_ADDRESS')
     ACCOUNT_EMAIL_SUBJECT_PREFIX = ''
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -183,6 +188,6 @@ ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  
-LOGIN_REDIRECT_URL = '/accounts/profile/'
+LOGIN_REDIRECT_URL = '/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/login/'
 ACCOUNT_SIGNUP_REDIRECT_URL = '/accounts/email-verification-required/'

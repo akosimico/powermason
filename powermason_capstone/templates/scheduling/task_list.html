@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load role_tags %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+    <h2 class="text-2xl font-bold mb-4">Tasks for {{ project.project_name }}</h2>
+     {% if user.is_superuser or user|has_role:"OM" or user|has_role:"EG" %}
+    <a href="{% url 'task_create' project.id token role %}"
+        class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition mb-4">
+        + Add Task
+    </a>
+
+    <a href="{% url 'review_updates' token role %}" 
+   class="inline-block bg-green-600 text-white px-4 py-2 rounded-lg shadow 
+          hover:bg-green-700 transition mb-4">
+    Review Updates
+</a>
+    
+    <form method="post" action="{% url 'task_bulk_delete' project.id token role %}">
+        {% csrf_token %}
+          <!-- Top bar with Delete button -->
+    <div class="flex justify-end mb-2">
+        <button type="submit"
+            class="bg-red-600 text-white px-4 py-2 rounded-lg shadow hover:bg-red-700 transition">
+            Delete Selected
+        </button>
+    </div>
+     {% endif %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full border border-gray-200 rounded-lg shadow-sm">
+                <thead class="bg-gray-800 text-white">
+                    <tr>
+                        <th class="px-4 py-2 text-left">
+                            <input type="checkbox" id="select-all">
+                        </th>
+                        <th class="px-4 py-2 text-left">Task</th>
+                        <th class="px-4 py-2 text-left">Scope</th>
+                        <th class="px-4 py-2 text-left">Assigned To</th>
+                        <th class="px-4 py-2 text-left">Start Date</th>
+                        <th class="px-4 py-2 text-left">End Date</th>
+                        <th class="px-4 py-2 text-left">Weight (%)</th>
+                        <th class="px-4 py-2 text-left">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for task in tasks %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-2">
+                            <input type="checkbox" name="task_ids" value="{{ task.id }}" class="task-checkbox">
+                        </td>
+                        <td class="px-4 py-2">{{ task.task_name }}</td>
+                        <td class="px-4 py-2">{{ task.scope|default:"-" }}</td>
+                        <td class="px-4 py-2">{{ task.assigned_to.full_name|default:"Unassigned" }}</td>
+                        <td class="px-4 py-2">{{ task.start_date }}</td>
+                        <td class="px-4 py-2">{{ task.end_date }}</td>
+                        <td class="px-4 py-2 font-semibold">{{ task.weight }}%</td>
+                        <td class="px-4 py-2">
+                              {% if user.is_superuser or user|has_role:"OM" or user|has_role:"EG" %}
+                            <a href="{% url 'task_update' project.id token role task.id %}"
+                               class="text-blue-600 hover:underline mr-3">Edit</a>
+                            <a href="{% url 'task_delete' project.id token role task.id %}"
+                               class="text-red-600 hover:underline">
+                               X
+                            </a>
+                               {% endif %}
+                                {% if user|has_role:"PM" %}
+                           <a href="{% url 'submit_progress' token task.id role %}" 
+                            class="inline-block px-4 py-2 bg-blue-600 text-white text-sm font-medium 
+                            rounded-lg shadow-md hover:bg-blue-700 focus:outline-none 
+                            focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 
+                            transition duration-200 ease-in-out">
+                            Submit Report
+                            </a>
+
+                            {% endif %}
+                        </td>
+                      
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="px-4 py-4 text-center text-gray-500 italic">
+                            No tasks found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    
+    </form>
+</div>
+
+<script>
+    document.getElementById("select-all").addEventListener("click", function(e) {
+        const checkboxes = document.querySelectorAll(".task-checkbox");
+        checkboxes.forEach(cb => cb.checked = e.target.checked);
+    });
+</script>
+{% endblock %}

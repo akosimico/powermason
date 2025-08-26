@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% load role_tags %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+    <h2 class="text-2xl font-bold mb-4">Tasks for {{ project.project_name }}</h2>
+
+    {% if user.is_superuser or user|has_role:"OM" or user|has_role:"EG" %}
+    <div class="flex space-x-2 mb-4">
+        <a href="{% url 'task_create' project.id token role %}"
+           class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition">
+           + Add Task
+        </a>
+        <a href="{% url 'review_updates'%}" 
+           class="bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 transition">
+           Review Updates
+        </a>
+    </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'task_bulk_delete' project.id token role %}">
+        {% csrf_token %}
+
+        <!-- Filters -->
+        <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
+            <input type="text" id="task-search" placeholder="Search tasks..." 
+                   class="border px-3 py-2 rounded w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-400">
+
+            <div class="flex gap-2 items-center">
+                <label>Start Date:</label>
+                <input type="date" id="filter-start" class="border px-2 py-1 rounded">
+                <label>End Date:</label>
+                <input type="date" id="filter-end" class="border px-2 py-1 rounded">
+                <label class="flex items-center gap-1">
+                    <input type="checkbox" id="completed-only" class="form-checkbox">
+                    Completed Only
+                </label>
+            </div>
+
+            {% if user.is_superuser or user|has_role:"OM" or user|has_role:"EG" %}
+            <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg shadow hover:bg-red-700 transition">
+                Delete Selected
+            </button>
+            {% endif %}
+            <!-- Back Button -->
+            <div class="mt-8">
+                <a href="{% url 'project_list' dashboard_token role %}"
+                   class="bg-gray-200 px-5 py-2 rounded-lg hover:bg-gray-300 transition">
+                    ← Back to Project List
+                </a>
+            </div>
+        </div>
+
+        <!-- Selected count and total tasks display -->
+        <div class="mb-2 text-sm font-medium text-gray-700">
+            Selected Tasks: <span id="selected-count">0</span> | Total Tasks: <span id="total-count">0</span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <div class="overflow-y-auto max-h-[600px] border border-gray-200 rounded-lg shadow-sm">
+                <table class="min-w-full border-collapse" id="tasks-table">
+                    <thead class="bg-blue-200 border-b border-blue-300 sticky top-0 z-10">
+                        <tr>
+                            <th class="px-4 py-3 w-12 text-center">
+                                <input type="checkbox" id="select-all" class="h-4 w-4 text-blue-600 focus:ring-blue-400 border-gray-300 rounded">
+                            </th>
+                            <th class="px-4 py-3 text-left text-sm font-medium text-blue-900">Task</th>
+                            <th class="px-4 py-3 text-left text-sm font-medium text-blue-900">Scope</th>
+                            <th class="px-4 py-3 text-left text-sm font-medium text-blue-900">Assigned To</th>
+                            <th class="px-4 py-3 text-left text-sm font-medium text-blue-900">Start Date</th>
+                            <th class="px-4 py-3 text-left text-sm font-medium text-blue-900">End Date</th>
+                            <th class="px-4 py-3 text-left text-sm font-medium text-blue-900">Weight (%)</th>
+                            <th class="px-4 py-3 text-left text-sm font-medium text-blue-900">Progress (%)</th>
+                            <th class="px-4 py-3 text-left text-sm font-medium text-blue-900">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-gray-200">
+                        {% for task in tasks %}
+                        <tr class="bg-white hover:bg-gray-50 transition"
+                            data-progress="{{ task.progress }}"
+                            data-start="{{ task.start_date }}"
+                            data-end="{{ task.end_date }}">
+                            <td class="px-4 py-3 text-center">
+                                <input type="checkbox" name="task_ids" value="{{ task.id }}" class="task-checkbox h-4 w-4 text-gray-600 border-gray-300 rounded">
+                            </td>
+                            <td class="px-4 py-3 text-gray-800 text-sm">{{ task.task_name }}</td>
+                            <td class="px-4 py-3 text-gray-700 text-sm">{{ task.scope|default:"-" }}</td>
+                            <td class="px-4 py-3 text-gray-700 text-sm">{{ task.assigned_to.full_name|default:"Unassigned" }}</td>
+                            <td class="px-4 py-3 text-gray-700 text-sm">{{ task.start_date }}</td>
+                            <td class="px-4 py-3 text-gray-700 text-sm">{{ task.end_date }}</td>
+                            <td class="px-4 py-3 text-gray-800 text-sm font-semibold">{{ task.weight }}%</td>
+                            <td class="px-4 py-3">
+                                <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                                    <div class="h-3 rounded-full transition-all duration-700
+                                        {% if task.progress >= 100 %}bg-green-500
+                                        {% elif task.progress >= 50 %}bg-yellow-500
+                                        {% else %}bg-red-500{% endif %}"
+                                        style="width: {{ task.progress }}%">
+                                    </div>
+                                </div>
+                                <span class="text-gray-800 text-sm font-medium mt-1 block">{{ task.progress }}%</span>
+                            </td>
+                            <td class="px-4 py-3 space-y-1">
+                                {% if task.progress < 100 and user|has_role:"PM" %}
+                                <a href="{% url 'submit_progress' token task.id role %}" 
+                                   class="inline-block px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-full shadow-sm 
+                                          hover:bg-blue-700 transition duration-200 ease-in-out">
+                                    Submit Report
+                                </a>
+                                {% elif task.progress >= 100 %}
+                                <span class="inline-block bg-green-100 text-green-700 text-sm font-semibold px-2 py-1 rounded-full">
+                                    Completed
+                                </span>
+                                {% endif %}
+
+                                {% if user.is_superuser or user|has_role:"OM" or user|has_role:"EG" %}
+                                <div class="flex space-x-2 mt-1">
+                                    <a href="{% url 'task_update' project.id token role task.id %}" 
+                                       class="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-full shadow-sm 
+                                              hover:bg-blue-700 transition duration-200 ease-in-out">
+                                        Edit
+                                    </a>
+                                    <a href="{% url 'task_delete' project.id token role task.id %}" 
+                                       class="px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded-full shadow-sm 
+                                              hover:bg-red-700 transition duration-200 ease-in-out">
+                                        Delete
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="px-4 py-4 text-center text-gray-500 italic text-sm">No tasks found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    const selectAll = document.getElementById("select-all");
+    const checkboxes = document.querySelectorAll(".task-checkbox");
+    const selectedCountEl = document.getElementById("selected-count");
+    const totalCountEl = document.getElementById("total-count");
+    const searchInput = document.getElementById("task-search");
+    const filterStart = document.getElementById("filter-start");
+    const filterEnd = document.getElementById("filter-end");
+    const completedOnly = document.getElementById("completed-only");
+    const tableRows = document.querySelectorAll("#tasks-table tbody tr");
+
+    function updateCounts() {
+        const visibleRows = Array.from(tableRows).filter(r => r.style.display !== "none");
+        const selectedCount = visibleRows.filter(r => r.querySelector(".task-checkbox").checked).length;
+        selectedCountEl.textContent = selectedCount;
+        totalCountEl.textContent = visibleRows.length;
+    }
+
+    selectAll.addEventListener("click", function(e){
+        tableRows.forEach(row => {
+            if(row.style.display !== "none"){
+                row.querySelector(".task-checkbox").checked = e.target.checked;
+            }
+        });
+        updateCounts();
+    });
+
+    checkboxes.forEach(cb => cb.addEventListener("change", updateCounts));
+
+    function filterTasks() {
+        const query = searchInput.value.toLowerCase();
+        const startDate = filterStart.value ? new Date(filterStart.value) : null;
+        const endDate = filterEnd.value ? new Date(filterEnd.value) : null;
+
+        tableRows.forEach(row => {
+            const taskName = row.cells[1].textContent.toLowerCase();
+            const scope = row.cells[2].textContent.toLowerCase();
+            const assignedTo = row.cells[3].textContent.toLowerCase();
+            const progress = parseFloat(row.dataset.progress);
+            const rowStart = new Date(row.dataset.start);
+            const rowEnd = new Date(row.dataset.end);
+
+            const matchesSearch = taskName.includes(query) || scope.includes(query) || assignedTo.includes(query);
+            const matchesDate = (!startDate || rowEnd >= startDate) && (!endDate || rowStart <= endDate);
+            const matchesCompleted = !completedOnly.checked || progress === 100;
+
+            row.style.display = (matchesSearch && matchesDate && matchesCompleted) ? "" : "none";
+        });
+
+        updateCounts();
+    }
+
+    searchInput.addEventListener("input", filterTasks);
+    filterStart.addEventListener("change", filterTasks);
+    filterEnd.addEventListener("change", filterTasks);
+    completedOnly.addEventListener("change", filterTasks);
+
+    // Initialize counts
+    updateCounts();
+</script>
+{% endblock %}

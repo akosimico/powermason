@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block head_title %}
+    {% trans "Profile" %}
+{% endblock head_title %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-6">
+    <div class="max-w-md w-full bg-white shadow-xl rounded-2xl p-10">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">{% trans "Profile" %}</h1>
+
+        <div class="space-y-4">
+            <!-- Username / First Name -->
+            <div class="flex justify-between items-center bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <span class="font-medium text-gray-700">{% trans "Username / First Name" %}</span>
+                <span class="text-gray-900">{{ user.first_name|default:user.username }}</span>
+            </div>
+
+            <!-- Email -->
+            <div class="flex justify-between items-center bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <span class="font-medium text-gray-700">{% trans "Email" %}</span>
+                <span class="text-gray-900">{{ user.email }}</span>
+            </div>
+
+            <!-- Verified -->
+            <div class="flex justify-between items-center bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <span class="font-medium text-gray-700">{% trans "Verified" %}</span>
+                {% if user.emailaddress_set.first.verified %}
+                    <span class="text-green-600 font-semibold">{% trans "Yes" %}</span>
+                {% else %}
+                    <span class="text-red-600 font-semibold">{% trans "No" %}</span>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock content %}

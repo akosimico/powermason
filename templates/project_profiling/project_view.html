@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load role_tags %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto bg-white shadow-lg rounded-2xl p-8">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Project Details</h2>
+     
+        <div class="flex gap-2">
+               {% if user.is_superuser or user|has_role:"OM" or user|has_role:"EG" %}
+ <a href="{% url 'project_edit' dashboard_token role project.project_type project.id %}"
+               class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                Edit Project
+            </a>
+            <a href="{% url 'task_list' project.id dashboard_token role %}" 
+               class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                Add Schedule
+            </a>
+            {% endif %}
+            <a href="{% url 'project_list' dashboard_token role %}"
+               class="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 transition">
+                ← Back to Project List
+            </a>
+        </div>
+     
+    </div>
+
+    <!-- Project Info Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700">
+        <div>
+            <p class="font-semibold">Project Code</p>
+            <p class="text-gray-900">{{ project.project_code }}</p>
+        </div>
+        <div>
+            <p class="font-semibold">Project Name</p>
+            <p class="text-gray-900">{{ project.project_name }}</p>
+        </div>
+        <div>
+            <p class="font-semibold">Project Type</p>
+            <p class="text-gray-900">{{ project.project_type }}</p>
+        </div>
+        <div>
+            <p class="font-semibold">Project Category</p>
+            <p class="text-gray-900">{{ project.project_category }}</p>
+        </div>
+        <div>
+            <p class="font-semibold">Project Manager</p>
+            <p class="text-gray-900">{{ project.project_manager.full_name }}</p>
+        </div>
+        <div>
+            <p class="font-semibold">Site Engineer</p>
+            <p class="text-gray-900">{{ project.site_engineer }}</p>
+        </div>
+        <div>
+            <p class="font-semibold">Start Date</p>
+            <p class="text-gray-900">{{ project.start_date }}</p>
+        </div>
+        <div>
+            <p class="font-semibold">Target Completion</p>
+            <p class="text-gray-900">{{ project.target_completion_date }}</p>
+        </div>
+        <div>
+            <p class="font-semibold">Status</p>
+            <p class="text-gray-900">{{ project.status }}</p>
+        </div>
+         <div>
+            <p class="font-semibold">Location</p>
+            <p class="text-gray-900">{{ project.location }}</p>
+        </div>
+        <div>
+            <p class="font-semibold">GPS Coordinates</p>
+            <p class="text-gray-900">{{ project.gps_coordinates }}</p>
+        </div>
+        <div>
+            <p class="font-semibold">City/Province</p>
+            <p class="text-gray-900">{{ project.city_province }}</p>
+        </div>
+        <div class="md:col-span-2">
+            <p class="font-semibold">Description</p>
+            <p class="text-gray-900">{{ project.description }}</p>
+        </div>
+    </div>
+
+    {% if role == "OM" or role == "EG" %}
+    <hr class="my-6">
+    <h3 class="text-xl font-bold mb-4 text-gray-800">Additional Information</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700">
+       
+        <div>
+            <p class="font-semibold">Estimated Cost</p>
+            <p class="text-gray-900">₱{{ project.estimated_cost }}</p>
+        </div>
+        <div>
+            <p class="font-semibold">Approved Budget</p>
+            <p class="text-gray-900">₱{{ project.approved_budget }}</p>
+        </div>
+        <div>
+            <p class="font-semibold">Allocated Funds</p>
+            <p class="text-gray-900">₱{{ project.allocated_funds }}</p>
+        </div>
+        <div>
+            <p class="font-semibold">Expense</p>
+            <p class="text-gray-900">₱{{ project.expense }}</p>
+        </div>
+        <div>
+            <p class="font-semibold">Payment Terms</p>
+            <p class="text-gray-900">{{ project.payment_terms }}</p>
+        </div>
+        <div>
+            <p class="font-semibold">Subcontractors</p>
+            <p class="text-gray-900">{{ project.subcontractors }}</p>
+        </div>
+        <div>
+            <p class="font-semibold">Contract Agreement</p>
+            {% if project.contract_agreement %}
+                <a href="{{ project.contract_agreement.url }}" class="text-blue-600 hover:underline" target="_blank">
+                    View File
+                </a>
+            {% else %}
+                <p class="text-gray-500">No file uploaded</p>
+            {% endif %}
+        </div>
+        <div>
+            <p class="font-semibold">Permits & Licenses</p>
+            {% if project.permits_licenses %}
+                <a href="{{ project.permits_licenses.url }}" class="text-blue-600 hover:underline" target="_blank">
+                    View File
+                </a>
+            {% else %}
+                <p class="text-gray-500">No file uploaded</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

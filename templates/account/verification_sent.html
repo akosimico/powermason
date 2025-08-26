@@ -1,0 +1,32 @@
+{% extends "base_auth.html" %}
+{% load i18n %}
+{% load allauth %}
+
+{% block head_title %}
+    {% trans "Verify Your Email Address" %}
+{% endblock head_title %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-50 px-6 py-12">
+    <div class="bg-white shadow-xl rounded-2xl p-10 max-w-lg w-full text-center">
+
+        <!-- Title -->
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">
+            {% trans "Verify Your Email Address" %}
+        </h1>
+
+        <!-- Intro Text -->
+        <p class="text-gray-700 mb-4 leading-relaxed font-semibold">
+            {% blocktrans %}We have sent an email to {{ user.email }} to verify your account. Please check your inbox and click the verification link to continue.{% endblocktrans %}
+        </p>
+
+        <!-- Additional Instructions -->
+        <p class="text-gray-600 mb-4 leading-relaxed">
+            {% blocktrans %}If you do not see the email in your inbox, please check your spam or junk folder. You can also request a new verification email if needed.{% endblocktrans %}
+        </p>
+
+
+
+    </div>
+</div>
+{% endblock content %}

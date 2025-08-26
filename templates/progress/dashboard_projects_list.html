@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<!-- ✅ Projects List -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  {% for data in projects %}
+  {% with project=data.project_name task_progress=data.task_progress total_progress=data.total_progress project_status=data.project_status %}
+  <div class="bg-white p-6 rounded-2xl shadow-md space-y-4">
+    
+    <!-- Project Title + Status -->
+    <div class="flex items-center justify-between mb-2">
+      <h2 class="text-xl font-semibold">{{ project }}</h2>
+      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+        {% if project_status == 'CP' %} bg-green-100 text-green-800
+        {% elif project_status == 'OG' %} bg-blue-100 text-blue-800
+        {% elif project_status == 'PL' %} bg-gray-100 text-gray-800
+        {% elif project_status == 'CN' %} bg-red-100 text-red-800
+        {% else %} bg-yellow-100 text-yellow-800 {% endif %}">
+        {% if project_status == 'CP' %} Completed
+        {% elif project_status == 'OG' %} Ongoing
+        {% elif project_status == 'PL' %} Planned
+        {% elif project_status == 'CN' %} Cancelled
+        {% else %} Unknown {% endif %}
+      </span>
+    </div>
+
+    <!-- Overall Project Progress -->
+    <div class="mt-4">
+      <div class="flex justify-between text-sm font-medium text-gray-700">
+        <span>Overall Project Progress</span>
+        <span class="font-semibold
+          {% if total_progress >= 100 %}text-green-600
+          {% elif total_progress >= 50 %}text-yellow-600
+          {% else %}text-red-600{% endif %}">
+          {{ total_progress }}%
+        </span>
+      </div>
+      <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden mt-1">
+        <div class="h-4 rounded-full transition-all duration-700
+                    {% if total_progress >= 100 %}bg-green-500
+                    {% elif total_progress >= 50 %}bg-yellow-500
+                    {% else %}bg-red-500{% endif %}"
+             style="width: {{ total_progress }}%"></div>
+      </div>
+    </div>
+
+    <!-- Tasks -->
+    <h3 class="text-sm font-semibold text-gray-700 mt-4 mb-2 text-center">
+      ← Tasks for this project →
+    </h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[250px] overflow-y-auto mt-3">
+      {% for task_name, progress, weight in task_progress %}
+      <div>
+        <div class="flex justify-between text-sm">
+          <span class="font-medium text-gray-700">{{ task_name }}</span>
+          <span class="font-semibold
+            {% if progress >= 100 %}text-green-600
+            {% elif progress >= 50 %}text-yellow-600
+            {% else %}text-red-600{% endif %}">
+            {{ progress }}%
+          </span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden mt-1">
+          <div class="h-3 rounded-full transition-all duration-700
+                      {% if progress >= 100 %}bg-green-500
+                      {% elif progress >= 50 %}bg-yellow-500
+                      {% else %}bg-red-500{% endif %} "
+               style="width: {{ progress }}%"></div>
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-gray-500 italic text-sm col-span-2">No tasks available.</p>
+      {% endfor %}
+    </div>
+
+  </div>
+  {% endwith %}
+  {% empty %}
+  <p class="text-gray-500 text-center italic">No projects available for your role.</p>
+  {% endfor %}
+</div>
+
+{% endblock %}

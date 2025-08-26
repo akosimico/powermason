@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto mt-8">
+  <h1 class="text-3xl font-bold mb-6 text-gray-800">Manage User Profiles</h1>
+
+  <!-- Table Search & Role Filter -->
+  <div class="flex flex-wrap items-center gap-4 mb-4">
+    <!-- Search Input -->
+    <div class="relative w-full max-w-md">
+      <input type="text" id="tableSearchInput" placeholder="Search by username or full name..."
+        class="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400">
+    </div>
+
+    <!-- Role Filter -->
+    <div>
+      <select id="roleFilter"
+        class="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400">
+        <option value="">All Roles</option>
+        {% for code, label in ROLE_CHOICES %}
+        <option value="{{ code }}">{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Table -->
+    <table class="w-full text-sm text-left border-collapse">
+      <thead class="bg-gray-50 text-gray-700 uppercase text-xs tracking-wider">
+        <tr>
+          <th class="px-4 py-3 border">Username</th>
+          <th class="px-4 py-3 border">Full Name</th>
+          <th class="px-4 py-3 border">Email</th>  <!-- New column -->
+          <th class="px-4 py-3 border">Role</th>
+          <th class="px-4 py-3 border text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        {% include 'partials/_user_table_rows.html' %}
+      </tbody>
+    </table>
+  </div>
+
+  {% endblock %}
+
+  {% block extra_scripts %}
+  <script src="{% static 'js/manage_user_profiles.js' %}" defer></script>
+  {% endblock %}
